@@ -1,3 +1,9 @@
 body {
-  background: #000;
+  background: #111;
+  margin: 10px auto;
+  text-align: center;
+}
+
+#canvas {
+  background: #333;
 }
