@@ -1,0 +1,27 @@
+{
+  "name": "10s",
+  "version": "0.0.0",
+  "description": "ludumdare entry",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/manuq/10s.git"
+  },
+  "keywords": [
+    "game"
+  ],
+  "author": "manuq",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/manuq/10s/issues"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.1",
+    "grunt-typescript": "~0.2.4",
+    "grunt-cli": "~0.1.9",
+    "grunt-contrib-watch": "~0.5.2"
+  }
+}
