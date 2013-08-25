@@ -79,9 +79,14 @@ function createAirProp() {
     airProp.graphics.beginFill("#00ff00").drawRect(0, 0, CELL * 5, CELL * 5);
     airProp.x = 640;
     airProp.y = 50 + Math.random() * (400 - CELL * 5 - 50);
+
     createjs.Tween.get(airProp).
         to({x: -CELL * 5}, 5000, createjs.Ease.linear).
         call(onAirPropComplete);
+
+    createjs.Tween.get(airProp, {loop: true}).
+        to({y: airProp.y - 30}, 1000, createjs.Ease.quadInOut).
+        to({y: airProp.y}, 500, createjs.Ease.quadInOut);
 
     airPropList.addChild(airProp);
 }
