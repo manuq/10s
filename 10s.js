@@ -28,9 +28,11 @@ var spriteData = {
     }
 };
 
+var transitionTime = 600;
 
 var bg = new createjs.Shape();
-bg.graphics.beginFill("#c9f6f3").drawRect(0, 0, 640, 400);
+bg.graphics.beginFill("#c9f6f3").drawRect(0, 0, 640, 350);
+bg.graphics.beginFill("#89dbda").drawRect(0, 350, 640, 350);
 stage.addChild(bg);
 
 var timer = new createjs.Shape();
@@ -50,13 +52,17 @@ function animateTimer() {
 }
 animateTimer();
 
+var allThings = new createjs.Container();
+stage.addChild(allThings);
+
 var prevPlatTime = 0;
 var lakePlatTimer = 1000;
 var lakePlatList = new createjs.Container();
-stage.addChild(lakePlatList);
+lakePlatList.y = 400;
+allThings.addChild(lakePlatList);
 
 var airPropList = new createjs.Container();
-stage.addChild(airPropList);
+allThings.addChild(airPropList);
 
 function createLakePlat() {
     var container = new createjs.Container();
@@ -193,12 +199,22 @@ function updateMode() {
     if (sceneNumber % 2 == 0) {
         mode = "lake";
         exitPlat();
-        bg.graphics.beginFill("#89dbda").drawRect(0, 0, 640, 400);
+
+        createjs.Tween.get(bg).
+            to({y: -300}, transitionTime, createjs.Ease.quadInOut);
+
+        createjs.Tween.get(allThings).
+            to({y: -400}, transitionTime, createjs.Ease.quadInOut);
     }
     else {
         mode = "air";
         exitPlat();
-        bg.graphics.beginFill("#c9f6f3").drawRect(0, 0, 640, 400);
+
+        createjs.Tween.get(bg).
+            to({y: 0}, transitionTime, createjs.Ease.quadInOut);
+
+        createjs.Tween.get(allThings).
+            to({y: 0}, transitionTime, createjs.Ease.quadInOut);
     }
 }
 
