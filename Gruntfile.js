@@ -9,7 +9,7 @@ module.exports = function(grunt) {
                     module: 'commonjs',
                     target: 'es5',
                     base_path: 'src',
-                    sourcemap: true,
+                    sourcemap: false,
                     fullSourceMapPath: false,
                     declaration: false,
                     comments: true,
