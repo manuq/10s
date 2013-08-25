@@ -1,4 +1,5 @@
 var stage = new createjs.Stage("canvas");
+stage.addEventListener("stagemousedown", handleMouseDown);
 
 var CELL = 19.75;
 
@@ -32,35 +33,39 @@ var bg = new createjs.Shape();
 bg.graphics.beginFill("#c9f6f3").drawRect(0, 0, 640, 400);
 stage.addChild(bg);
 
+var sceneNumber = 1;
+
+var timer = new createjs.Shape();
+timer.graphics.beginFill("#555").arc(25, 0, 25, 0, Math.PI, false);
+timer.x = 295;
+timer.y = 0;
+timer.scaleX = 0;
+timer.scaleY = 0;
+timer.regX = 25;
+stage.addChild(timer);
+
+function animateTimer() {
+    createjs.Tween.get(timer).
+        to({scaleX: 1, scaleY: 1}, 300, createjs.Ease.quadInOut).
+        to({scaleX: 0, scaleY: 0}, 9700, createjs.Ease.linear).
+        call(onTimerComplete);
+}
+animateTimer();
+
 var spriteSheet = new createjs.SpriteSheet(spriteData);
 var me = new createjs.BitmapAnimation(spriteSheet);
 me.x = 100;
 me.y = 100;
+me.regX = CELL * 1.5;
+me.regY = CELL * 1.5;
 me.gotoAndPlay("fly");
-
 stage.addChild(me);
 
 stage.update();
 
-stage.addEventListener("stagemousedown", handleMouseDown);
-stage.addEventListener("stagemouseup", handleMouseUp);
-
 var mode = "air"; // air, lake
 
 var moving = false;
-
-// var vaiveing = true;
-
-// function vaiven() {
-//     if (!vaiveing) {
-//         return;
-//     }
-//     createjs.Tween.get(me).
-//         to({y: me.x + 20}, 500, createjs.Ease.quadInOut).
-//         to({y: me.x - 20}, 500, createjs.Ease.quadInOut).
-//         call(vaiven);
-// }
-// vaiven();
 
 function handleMouseDown(event) {
     if (moving) {
@@ -68,10 +73,9 @@ function handleMouseDown(event) {
     }
     moving = true;
     if (mode == "air") {
-//        vaiveing = false;
         createjs.Tween.get(me).
             to({x: stage.mouseX, y: stage.mouseY}, 400, createjs.Ease.quadInOut).
-            call(onComplete);
+            call(onAirComplete);
     }
     else {
         if (mode == "lake") {
@@ -83,40 +87,39 @@ function handleMouseDown(event) {
             createjs.Tween.get(me).
                 to({y: yMed}, 200, createjs.Ease.circOut).
                 to({y: stage.mouseY}, 200, createjs.Ease.circIn).
-                call(onComplete);
+                call(onLakeComplete);
 
             me.gotoAndPlay("jump");
         }
     }
 }
 
-function handleMouseUp(event) {
-}
-
 createjs.Ticker.setFPS(24);
 createjs.Ticker.addEventListener("tick", mainloop);
 
-function onComplete() {
+function mainloop(event) {
+    stage.update();
+}
+
+function onTimerComplete() {
+    sceneNumber += 1;
+    if (sceneNumber % 2 == 0) {
+        mode = "lake";
+        bg.graphics.beginFill("#89dbda").drawRect(0, 0, 640, 400);
+    }
+    else {
+        mode = "air";
+        bg.graphics.beginFill("#c9f6f3").drawRect(0, 0, 640, 400);
+    }
+    animateTimer();
+}
+
+function onAirComplete() {
     me.gotoAndPlay("fly");
     moving = false;
 }
 
-var sceneNumber = 1;
-
-function mainloop(event) {
-    if (createjs.Ticker.getTime() < 10000 * sceneNumber) {
-        stage.update();
-    }
-    else {
-        console.log("new scene");
-        sceneNumber += 1;
-        if (sceneNumber % 2 == 0) {
-            mode = "lake";
-            bg.graphics.beginFill("#89dbda").drawRect(0, 0, 640, 400);
-        }
-        else {
-            mode = "air";
-            bg.graphics.beginFill("#c9f6f3").drawRect(0, 0, 640, 400);
-        }
-    }
+function onLakeComplete() {
+    me.gotoAndPlay("fly");
+    moving = false;
 }
