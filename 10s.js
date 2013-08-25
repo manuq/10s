@@ -50,23 +50,23 @@ function animateTimer() {
 }
 animateTimer();
 
+var prevPlatTime = 0;
 var lakePlatTimer = 1000;
-var lakePlatList = [];
+var lakePlatList = new createjs.Container();
+stage.addChild(lakePlatList);
 
-for (i=0; i<5; i++) {
+function createLakePlat() {
     var lakePlat = new createjs.Shape();
     lakePlat.graphics.beginFill("#ff0000").drawRect(0, 0, CELL * 6, CELL * 4);
-    lakePlat.x = 640 + Math.random() * 640;
+    lakePlat.x = 640;
     lakePlat.y = 50 + Math.random() * (400 - CELL * 4 - 50);
 
     createjs.Tween.get(lakePlat).
-        to({x: CELL * 6}, 5000, createjs.Ease.linear).
+        to({x: -CELL * 6}, 5000, createjs.Ease.linear).
         call(onlakePlatComplete);
 
-    stage.addChild(lakePlat);
-    lakePlatList.push(lakePlat);
+    lakePlatList.addChild(lakePlat);
 }
-
 
 var spriteSheet = new createjs.SpriteSheet(spriteData);
 var me = new createjs.BitmapAnimation(spriteSheet);
@@ -83,6 +83,7 @@ var sceneNumber = 2;
 var mode = "lake"; // air, lake
 
 var moving = false;
+var onPlat;
 
 function handleMouseDown(event) {
     if (moving) {
@@ -116,6 +117,11 @@ createjs.Ticker.addEventListener("tick", mainloop);
 
 function mainloop(event) {
     stage.update();
+
+    if ((createjs.Ticker.getTime() - prevPlatTime) > lakePlatTimer) {
+        prevPlatTime = createjs.Ticker.getTime();
+        createLakePlat();
+    }
 }
 
 function onTimerComplete() {
@@ -136,20 +142,20 @@ function onAirComplete() {
     moving = false;
 }
 
-function onlakePlatComplete(plat) {
-    stage.removeChild(plat);
-    console.log("COMP");
+function onlakePlatComplete() {
+    lakePlatList.removeChild(this);
 }
 
 function onLakeComplete() {
     me.gotoAndPlay("fly");
     moving = false;
-    for (i=0; i<lakePlatList.length; i++) {
-        var lakePlat = lakePlatList[i];
+    for (i=0; i<lakePlatList.children.length; i++) {
+        var lakePlat = lakePlatList.children[i];
         // FIXME USE lakePlat.hitTest(me.x, me.y)
         if ((lakePlat.x < me.x) && (me.x < lakePlat.x + CELL * 6) &&
             (lakePlat.y < me.y) && (me.y < lakePlat.y + CELL * 4)) {
             lakePlat.graphics.beginFill("#ffff00").drawRect(0, 0, CELL * 6, CELL * 4);
+            onPlat = lakePlat;
             return;
         }
     }
