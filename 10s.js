@@ -44,7 +44,7 @@ timer.scaleY = 0;
 timer.regX = 25;
 stage.addChild(timer);
 
-var TEN = 3000;
+var TEN = 10000;
 
 function animateTimer() {
     createjs.Tween.get(timer).
@@ -126,10 +126,14 @@ var sceneNumber = 1;
 var mode; // air, lake
 updateMode();
 
+var inTransition = false;
 var moving = false;
 var platContainer;
 
 function handleMouseDown(event) {
+    if (inTransition) {
+        return;
+    }
     if (moving) {
         return;
     }
@@ -216,14 +220,21 @@ function enterPlat(container) {
     platContainer = container;
 }
 
+function endTransition() {
+    inTransition = false;
+}
+
 function updateMode() {
     moving = false;
+    inTransition = true;
+
     if (sceneNumber % 2 == 0) {
         mode = "lake";
         exitPlat();
 
         createjs.Tween.get(bg).
-            to({y: -300}, transitionTime, createjs.Ease.quadInOut);
+            to({y: -300}, transitionTime, createjs.Ease.quadInOut).
+            call(endTransition);
 
         createjs.Tween.get(allThings).
             to({y: -400}, transitionTime, createjs.Ease.quadInOut);
@@ -240,7 +251,8 @@ function updateMode() {
         exitPlat();
 
         createjs.Tween.get(bg).
-            to({y: 0}, transitionTime, createjs.Ease.quadInOut);
+            to({y: 0}, transitionTime, createjs.Ease.quadInOut).
+            call(endTransition);
 
         createjs.Tween.get(allThings).
             to({y: 0}, transitionTime, createjs.Ease.quadInOut);
