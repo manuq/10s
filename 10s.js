@@ -55,6 +55,9 @@ var lakePlatTimer = 1000;
 var lakePlatList = new createjs.Container();
 stage.addChild(lakePlatList);
 
+var airPropList = new createjs.Container();
+stage.addChild(airPropList);
+
 function createLakePlat() {
     var container = new createjs.Container();
     lakePlatList.addChild(container);
@@ -66,12 +69,29 @@ function createLakePlat() {
 
     createjs.Tween.get(container).
         to({x: -CELL * 6}, 5000, createjs.Ease.linear).
-        call(onlakePlatComplete);
+        call(onLakePlatComplete);
 
     container.addChild(lakePlat);
 }
 
-createLakePlat();
+function createAirProp() {
+    var airProp = new createjs.Shape();
+    airProp.graphics.beginFill("#00ff00").drawRect(0, 0, CELL * 5, CELL * 5);
+    airProp.x = 640;
+    airProp.y = 50 + Math.random() * (400 - CELL * 5 - 50);
+    createjs.Tween.get(airProp).
+        to({x: -CELL * 5}, 5000, createjs.Ease.linear).
+        call(onAirPropComplete);
+
+    airPropList.addChild(airProp);
+}
+
+if (mode == 'lake') {
+    createLakePlat();
+}
+else {
+    createAirProp();
+}
 
 var spriteSheet = new createjs.SpriteSheet(spriteData);
 var me = new createjs.BitmapAnimation(spriteSheet);
@@ -139,7 +159,12 @@ function mainloop(event) {
 
     if ((createjs.Ticker.getTime() - prevPlatTime) > lakePlatTimer) {
         prevPlatTime = createjs.Ticker.getTime();
-        createLakePlat();
+        if (mode == "lake") {
+            createLakePlat();
+        }
+        else {
+            createAirProp();
+        }
     }
 }
 
@@ -167,8 +192,12 @@ function onAirComplete() {
     moving = false;
 }
 
-function onlakePlatComplete() {
+function onLakePlatComplete() {
     lakePlatList.removeChild(this);
+}
+
+function onAirPropComplete() {
+    airPropList.removeChild(this);
 }
 
 function onLakeComplete() {
