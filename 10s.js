@@ -44,10 +44,12 @@ timer.scaleY = 0;
 timer.regX = 25;
 stage.addChild(timer);
 
+var TEN = 10000;
+
 function animateTimer() {
     createjs.Tween.get(timer).
         to({scaleX: 1, scaleY: 1}, 300, createjs.Ease.quadInOut).
-        to({scaleX: 0, scaleY: 0}, 9700, createjs.Ease.linear).
+        to({scaleX: 0, scaleY: 0}, TEN - 300, createjs.Ease.linear).
         call(onTimerComplete);
 }
 animateTimer();
@@ -64,17 +66,28 @@ allThings.addChild(lakePlatList);
 var airPropList = new createjs.Container();
 allThings.addChild(airPropList);
 
-function createLakePlat() {
+function createLakePlat(dx) {
+    var xIni;
+    var xFin;
+    if (!dx) {
+        var xIni = 640;
+        var xFin = -CELL * 6;
+    }
+    else {
+        var xIni = dx;
+        var xFin = dx - 640 - CELL * 6;
+    }
+
     var container = new createjs.Container();
     lakePlatList.addChild(container);
 
     var lakePlat = new createjs.Shape();
     lakePlat.graphics.beginFill("#ff0000").drawRect(0, 0, CELL * 6, CELL * 4);
-    container.x = 640;
+    container.x = xIni;
     container.y = 50 + Math.random() * (400 - CELL * 4 - 50);
 
     createjs.Tween.get(container).
-        to({x: -CELL * 6}, 5000, createjs.Ease.linear).
+        to({x: xFin}, 5000, createjs.Ease.linear).
         call(onLakePlatComplete);
 
     container.addChild(lakePlat);
@@ -95,13 +108,6 @@ function createAirProp() {
         to({y: airProp.y}, 500, createjs.Ease.quadInOut);
 
     airPropList.addChild(airProp);
-}
-
-if (mode == 'lake') {
-    createLakePlat();
-}
-else {
-    createAirProp();
 }
 
 var spriteSheet = new createjs.SpriteSheet(spriteData);
@@ -205,6 +211,8 @@ function updateMode() {
 
         createjs.Tween.get(allThings).
             to({y: -400}, transitionTime, createjs.Ease.quadInOut);
+
+        createLakePlat(me.x);
     }
     else {
         mode = "air";
@@ -215,6 +223,8 @@ function updateMode() {
 
         createjs.Tween.get(allThings).
             to({y: 0}, transitionTime, createjs.Ease.quadInOut);
+
+        createAirProp();
     }
 }
 
