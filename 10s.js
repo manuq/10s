@@ -29,7 +29,7 @@ var spriteData = {
 
 
 var bg = new createjs.Shape();
-bg.graphics.beginFill("#89dbda").drawRect(0, 0, 640, 400);
+bg.graphics.beginFill("#c9f6f3").drawRect(0, 0, 640, 400);
 stage.addChild(bg);
 
 var spriteSheet = new createjs.SpriteSheet(spriteData);
@@ -45,7 +45,7 @@ stage.update();
 stage.addEventListener("stagemousedown", handleMouseDown);
 stage.addEventListener("stagemouseup", handleMouseUp);
 
-var mode = "fly";
+var mode = "air"; // air, lake
 
 var moving = false;
 
@@ -67,14 +67,14 @@ function handleMouseDown(event) {
         return;
     }
     moving = true;
-    if (mode == "fly") {
+    if (mode == "air") {
 //        vaiveing = false;
         createjs.Tween.get(me).
             to({x: stage.mouseX, y: stage.mouseY}, 400, createjs.Ease.quadInOut).
             call(onComplete);
     }
     else {
-        if (mode == "jump") {
+        if (mode == "lake") {
             var yMed = Math.min(me.y, stage.mouseY) - 50;
 
             createjs.Tween.get(me).
@@ -111,12 +111,12 @@ function mainloop(event) {
         console.log("new scene");
         sceneNumber += 1;
         if (sceneNumber % 2 == 0) {
-            mode = "jump";
-            bg.graphics.beginFill("#4b8e8d").drawRect(0, 0, 640, 400);
+            mode = "lake";
+            bg.graphics.beginFill("#89dbda").drawRect(0, 0, 640, 400);
         }
         else {
-            mode = "fly";
-            bg.graphics.beginFill("#89dbda").drawRect(0, 0, 640, 400);
+            mode = "air";
+            bg.graphics.beginFill("#c9f6f3").drawRect(0, 0, 640, 400);
         }
     }
 }
