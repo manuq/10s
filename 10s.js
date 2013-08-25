@@ -146,8 +146,20 @@ function exitPlat() {
         me.x = p.x;
         me.y = p.y;
         stage.addChild(me);
-        platContainer.removeChild(me);
         platContainer = undefined;
+    }
+}
+
+function collidePointWithRect(x, y, rx, ry, rw, rh) {
+    return (rx < x) && (x < rx + rw) && (ry < y) && (y < ry + rh);
+}
+
+function detectCollisions() {
+    for (i=0; i<airPropList.children.length; i++) {
+        var prop = airPropList.children[i];
+        if (collidePointWithRect(me.x, me.y, prop.x, prop.y, CELL * 5, CELL * 5)) {
+            prop.graphics.beginFill("#ffff00").drawRect(0, 0, CELL * 5, CELL * 5);
+        }
     }
 }
 
@@ -156,6 +168,10 @@ createjs.Ticker.addEventListener("tick", mainloop);
 
 function mainloop(event) {
     stage.update();
+
+    if (mode == "air") {
+        detectCollisions();
+    }
 
     if ((createjs.Ticker.getTime() - prevPlatTime) > lakePlatTimer) {
         prevPlatTime = createjs.Ticker.getTime();
@@ -206,16 +222,18 @@ function onLakeComplete() {
     for (i=0; i<lakePlatList.children.length; i++) {
         var container = lakePlatList.children[i];
         // FIXME USE lakePlat.hitTest(me.x, me.y)
-        if ((container.x < me.x) && (me.x < container.x + CELL * 6) &&
-            (container.y < me.y) && (me.y < container.y + CELL * 4)) {
+        if (collidePointWithRect(me.x, me.y, container.x, container.y, CELL * 6, CELL * 4)) {
             var lakePlat = container.children[0];
             lakePlat.graphics.beginFill("#ffff00").drawRect(0, 0, CELL * 6, CELL * 4);
+
+            createjs.Tween.get(container).
+                to({y: container.y + 20}, 100, createjs.Ease.quadInOut).
+                to({y: container.y}, 300, createjs.Ease.quadInOut);
 
             createjs.Tween.removeTweens(me);
             var p = container.globalToLocal(me.x, me.y);
             me.x = p.x;
             me.y = p.y;
-            stage.removeChild(me);
             container.addChild(me);
             platContainer = container;
             return;
