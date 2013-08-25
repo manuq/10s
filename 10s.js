@@ -56,17 +56,22 @@ var lakePlatList = new createjs.Container();
 stage.addChild(lakePlatList);
 
 function createLakePlat() {
+    var container = new createjs.Container();
+    lakePlatList.addChild(container);
+
     var lakePlat = new createjs.Shape();
     lakePlat.graphics.beginFill("#ff0000").drawRect(0, 0, CELL * 6, CELL * 4);
-    lakePlat.x = 640;
-    lakePlat.y = 50 + Math.random() * (400 - CELL * 4 - 50);
+    container.x = 640;
+    container.y = 50 + Math.random() * (400 - CELL * 4 - 50);
 
-    createjs.Tween.get(lakePlat).
+    createjs.Tween.get(container).
         to({x: -CELL * 6}, 5000, createjs.Ease.linear).
         call(onlakePlatComplete);
 
-    lakePlatList.addChild(lakePlat);
+    container.addChild(lakePlat);
 }
+
+createLakePlat();
 
 var spriteSheet = new createjs.SpriteSheet(spriteData);
 var me = new createjs.BitmapAnimation(spriteSheet);
@@ -79,11 +84,12 @@ stage.addChild(me);
 
 stage.update();
 
-var sceneNumber = 2;
-var mode = "lake"; // air, lake
+var sceneNumber = 1;
+var mode; // air, lake
+updateMode();
 
 var moving = false;
-var onPlat;
+var platContainer;
 
 function handleMouseDown(event) {
     if (moving) {
@@ -97,6 +103,8 @@ function handleMouseDown(event) {
     }
     else {
         if (mode == "lake") {
+            exitPlat();
+
             var yMed = Math.min(me.y, stage.mouseY) - 50;
 
             createjs.Tween.get(me).
@@ -112,6 +120,17 @@ function handleMouseDown(event) {
     }
 }
 
+function exitPlat() {
+    if (platContainer !== undefined) {
+        var p = platContainer.localToGlobal(me.x, me.y);
+        me.x = p.x;
+        me.y = p.y;
+        stage.addChild(me);
+        platContainer.removeChild(me);
+        platContainer = undefined;
+    }
+}
+
 createjs.Ticker.setFPS(24);
 createjs.Ticker.addEventListener("tick", mainloop);
 
@@ -124,16 +143,22 @@ function mainloop(event) {
     }
 }
 
-function onTimerComplete() {
-    sceneNumber += 1;
+function updateMode() {
     if (sceneNumber % 2 == 0) {
         mode = "lake";
+        exitPlat();
         bg.graphics.beginFill("#89dbda").drawRect(0, 0, 640, 400);
     }
     else {
         mode = "air";
+        exitPlat();
         bg.graphics.beginFill("#c9f6f3").drawRect(0, 0, 640, 400);
     }
+}
+
+function onTimerComplete() {
+    sceneNumber += 1;
+    updateMode();
     animateTimer();
 }
 
@@ -150,12 +175,20 @@ function onLakeComplete() {
     me.gotoAndPlay("fly");
     moving = false;
     for (i=0; i<lakePlatList.children.length; i++) {
-        var lakePlat = lakePlatList.children[i];
+        var container = lakePlatList.children[i];
         // FIXME USE lakePlat.hitTest(me.x, me.y)
-        if ((lakePlat.x < me.x) && (me.x < lakePlat.x + CELL * 6) &&
-            (lakePlat.y < me.y) && (me.y < lakePlat.y + CELL * 4)) {
+        if ((container.x < me.x) && (me.x < container.x + CELL * 6) &&
+            (container.y < me.y) && (me.y < container.y + CELL * 4)) {
+            var lakePlat = container.children[0];
             lakePlat.graphics.beginFill("#ffff00").drawRect(0, 0, CELL * 6, CELL * 4);
-            onPlat = lakePlat;
+
+            createjs.Tween.removeTweens(me);
+            var p = container.globalToLocal(me.x, me.y);
+            me.x = p.x;
+            me.y = p.y;
+            stage.removeChild(me);
+            container.addChild(me);
+            platContainer = container;
             return;
         }
     }
