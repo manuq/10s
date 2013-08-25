@@ -44,7 +44,7 @@ timer.scaleY = 0;
 timer.regX = 25;
 stage.addChild(timer);
 
-var TEN = 10000;
+var TEN = 3000;
 
 function animateTimer() {
     createjs.Tween.get(timer).
@@ -91,6 +91,7 @@ function createLakePlat(dx) {
         call(onLakePlatComplete);
 
     container.addChild(lakePlat);
+    return container;
 }
 
 function createAirProp() {
@@ -201,7 +202,22 @@ function mainloop(event) {
     }
 }
 
+function enterPlat(container) {
+    createjs.Tween.get(container).
+        to({y: container.y + 20}, 100, createjs.Ease.quadInOut).
+        to({y: container.y}, 300, createjs.Ease.quadInOut);
+
+    createjs.Tween.removeTweens(me);
+    var p = container.globalToLocal(me.x, me.y);
+    me.x = p.x;
+    me.y = p.y;
+
+    container.addChild(me);
+    platContainer = container;
+}
+
 function updateMode() {
+    moving = false;
     if (sceneNumber % 2 == 0) {
         mode = "lake";
         exitPlat();
@@ -212,7 +228,12 @@ function updateMode() {
         createjs.Tween.get(allThings).
             to({y: -400}, transitionTime, createjs.Ease.quadInOut);
 
-        createLakePlat(me.x);
+        var container = createLakePlat(320);
+
+        createjs.Tween.removeTweens(me);
+        createjs.Tween.get(me).
+            to({x: container.x + CELL * 2, y: container.y + 400 - CELL * 2}, 200, createjs.Ease.circIn).
+            call(enterPlat, [container]);
     }
     else {
         mode = "air";
@@ -256,17 +277,7 @@ function onLakeComplete() {
         if (collidePointWithRect(me.x, me.y, container.x, container.y, CELL * 6, CELL * 4)) {
             var lakePlat = container.children[0];
             lakePlat.graphics.beginFill("#ffff00").drawRect(0, 0, CELL * 6, CELL * 4);
-
-            createjs.Tween.get(container).
-                to({y: container.y + 20}, 100, createjs.Ease.quadInOut).
-                to({y: container.y}, 300, createjs.Ease.quadInOut);
-
-            createjs.Tween.removeTweens(me);
-            var p = container.globalToLocal(me.x, me.y);
-            me.x = p.x;
-            me.y = p.y;
-            container.addChild(me);
-            platContainer = container;
+            enterPlat(container);
             return;
         }
     }
