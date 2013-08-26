@@ -217,7 +217,10 @@ function detectCollisions() {
     for (i=0; i<airPropList.children.length; i++) {
         var prop = airPropList.children[i];
         if (collidePointWithRect(me.x, me.y, prop.x, prop.y, CELL * 5, CELL * 5)) {
-            console.log("POP");
+
+            createjs.Tween.get(me).
+                to({x: -100}, me.x * 4, createjs.Ease.circOut);
+            break;
         }
     }
 }
