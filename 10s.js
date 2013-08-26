@@ -6,6 +6,7 @@ var CELL = 19.75;
 var spriteData = {
     images: ["sprite.png"],
     frames: [
+        // leaf anim jump
         [0, 0, 3 * CELL, 3 * CELL, 0, 0, 0],
         [0, 3 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [0, 6 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
@@ -21,6 +22,8 @@ var spriteData = {
         [0, 36 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [0, 39 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [0, 42 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
+
+        // leaf anim fly
         [3 * CELL, 0, 3 * CELL, 3 * CELL, 0, 0, 0],
         [3 * CELL, 3 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [3 * CELL, 6 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
@@ -28,11 +31,13 @@ var spriteData = {
         [3 * CELL, 12 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [3 * CELL, 15 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
 
+        // air props
         [7 * CELL, 0, 5 * CELL, 5 * CELL, 0, 0, 0],
         [7 * CELL, 6 * CELL, 5 * CELL, 5 * CELL, 0, 0, 0],
         [7 * CELL, 12 * CELL, 5 * CELL, 5 * CELL, 0, 0, 0],
         [7 * CELL, 18 * CELL, 5 * CELL, 5 * CELL, 0, 0, 0],
 
+        // lake plats
         [13 * CELL, 0, 6 * CELL, 4 * CELL, 0, 0, 0],
         [13 * CELL, 5 * CELL, 6 * CELL, 4 * CELL, 0, 0, 0],
         [13 * CELL, 10 * CELL, 6 * CELL, 4 * CELL, 0, 0, 0],
@@ -42,15 +47,7 @@ var spriteData = {
         stand: {frames: [0, 0, 1, 1, 13, 13, 14, 14]},
         jump: [0, 14, "stand"],
         fly: {frames: [15, 16, 17, 18, 19, 20, 18, 16],
-             next: "stand"},
-        prop1: [21],
-        prop2: [22],
-        prop3: [23],
-        prop4: [24],
-        plat1: [25],
-        plat2: [26],
-        plat3: [27],
-        plat4: [28]
+             next: "stand"}
     }
 };
 
@@ -169,16 +166,21 @@ function handleMouseDown(event) {
     if (moving) {
         return;
     }
-    moving = true;
     if (mode == "air") {
         createjs.Tween.get(me).
             to({x: stage.mouseX, y: stage.mouseY}, 400, createjs.Ease.quadInOut).
             call(onAirComplete);
 
+        moving = true;
         me.gotoAndPlay("fly");
     }
     else {
         if (mode == "lake") {
+            // horizon
+            if (stage.mouseY < 50) {
+                return;
+            }
+
             exitPlat();
 
             var yMed = Math.min(me.y, stage.mouseY) - 50;
@@ -191,6 +193,7 @@ function handleMouseDown(event) {
                 to({y: stage.mouseY}, 200, createjs.Ease.circIn).
                 call(onLakeComplete);
 
+            moving = true;
             me.gotoAndPlay("jump");
         }
     }
@@ -261,6 +264,8 @@ function endTransition() {
 function updateMode() {
     moving = false;
     inTransition = true;
+
+    me.gotoAndPlay("fly");
 
     if (sceneNumber % 2 == 0) {
         mode = "lake";
