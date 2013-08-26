@@ -26,13 +26,31 @@ var spriteData = {
         [3 * CELL, 6 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [3 * CELL, 9 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [3 * CELL, 12 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
-        [3 * CELL, 15 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0]
+        [3 * CELL, 15 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
+
+        [7 * CELL, 0, 5 * CELL, 5 * CELL, 0, 0, 0],
+        [7 * CELL, 6 * CELL, 5 * CELL, 5 * CELL, 0, 0, 0],
+        [7 * CELL, 12 * CELL, 5 * CELL, 5 * CELL, 0, 0, 0],
+        [7 * CELL, 18 * CELL, 5 * CELL, 5 * CELL, 0, 0, 0],
+
+        [13 * CELL, 0, 6 * CELL, 4 * CELL, 0, 0, 0],
+        [13 * CELL, 5 * CELL, 6 * CELL, 4 * CELL, 0, 0, 0],
+        [13 * CELL, 10 * CELL, 6 * CELL, 4 * CELL, 0, 0, 0],
+        [13 * CELL, 15 * CELL, 6 * CELL, 4 * CELL, 0, 0, 0]
     ],
     animations: {
         stand: {frames: [0, 0, 1, 1, 13, 13, 14, 14]},
         jump: [0, 14, "stand"],
         fly: {frames: [15, 16, 17, 18, 19, 20, 18, 16],
-             next: "stand"}
+             next: "stand"},
+        prop1: [21],
+        prop2: [22],
+        prop3: [23],
+        prop4: [24],
+        plat1: [25],
+        plat2: [26],
+        plat3: [27],
+        plat4: [28]
     }
 };
 
@@ -89,8 +107,8 @@ function createLakePlat(dx) {
     var container = new createjs.Container();
     lakePlatList.addChild(container);
 
-    var lakePlat = new createjs.Shape();
-    lakePlat.graphics.beginFill("#ff0000").drawRect(0, 0, CELL * 6, CELL * 4);
+    var lakePlat = new createjs.BitmapAnimation(spriteSheet);
+    lakePlat.gotoAndStop(25 + Math.floor(Math.random() * 4));
     container.x = xIni;
     container.y = 30 + Math.random() * (400 - CELL * 4 - 30);
 
@@ -103,8 +121,8 @@ function createLakePlat(dx) {
 }
 
 function createAirProp() {
-    var airProp = new createjs.Shape();
-    airProp.graphics.beginFill("#00ff00").drawRect(0, 0, CELL * 5, CELL * 5);
+    var airProp = new createjs.BitmapAnimation(spriteSheet);
+    airProp.gotoAndStop(21 + Math.floor(Math.random() * 4));
     airProp.x = 640;
     airProp.y = Math.random() * (400 - CELL * 5);
 
@@ -190,7 +208,7 @@ function detectCollisions() {
     for (i=0; i<airPropList.children.length; i++) {
         var prop = airPropList.children[i];
         if (collidePointWithRect(me.x, me.y, prop.x, prop.y, CELL * 5, CELL * 5)) {
-            prop.graphics.beginFill("#ffff00").drawRect(0, 0, CELL * 5, CELL * 5);
+            console.log("POP");
         }
     }
 }
@@ -297,7 +315,7 @@ function onLakeComplete() {
         // FIXME use lakePlat.hitTest(me.x, me.y)
         if (collidePointWithRect(me.x, me.y, container.x, container.y, CELL * 6, CELL * 4)) {
             var lakePlat = container.children[0];
-            lakePlat.graphics.beginFill("#ffff00").drawRect(0, 0, CELL * 6, CELL * 4);
+            console.log("IN");
             enterPlat(container);
             return;
         }
