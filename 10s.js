@@ -51,6 +51,8 @@ var spriteData = {
     }
 };
 
+var lives = 5;
+
 var transitionTime = 600;
 
 var bg = new createjs.Shape();
@@ -209,6 +211,17 @@ function exitPlat() {
     }
 }
 
+function restartLake() {
+    me.x = 320;
+    me.y = -100;
+    var container = lakePlatList.children[lakePlatList.children.length-1];
+    createjs.Tween.removeTweens(me);
+    createjs.Tween.get(me).
+        to({x: container.x + CELL * 2, y: container.y + 50 - CELL * 2},
+           200, createjs.Ease.circIn).
+        call(enterPlat, [container]);
+}
+
 function collidePointWithRect(x, y, rx, ry, rw, rh) {
     return (rx < x) && (x < rx + rw) && (ry < y) && (y < ry + rh);
 }
@@ -217,11 +230,33 @@ function detectCollisions() {
     for (i=0; i<airPropList.children.length; i++) {
         var prop = airPropList.children[i];
         if (collidePointWithRect(me.x, me.y, prop.x, prop.y, CELL * 5, CELL * 5)) {
-
+            lives -= 1;
+            console.log(lives);
             createjs.Tween.get(me).
                 to({x: -100}, me.x * 4, createjs.Ease.circOut);
             break;
         }
+    }
+}
+
+function detectOutOfScreen() {
+    var lost = false;
+    if (platContainer == undefined) {
+        if (me.x < 0) {
+            lost = true;
+        }
+    }
+    else {
+        if (platContainer.x + me.x < 0) {
+            lost = true;
+        }
+    }
+    if (lost) {
+        lives -= 1;
+        console.log(lives);
+
+        exitPlat();
+        restartLake();
     }
 }
 
@@ -233,6 +268,10 @@ function mainloop(event) {
 
     if (mode == "air") {
         detectCollisions();
+    }
+
+    if (mode == "lake") {
+        detectOutOfScreen();
     }
 
     if ((createjs.Ticker.getTime() - prevPlatTime) > lakePlatTimer) {
@@ -332,11 +371,9 @@ function onLakeComplete() {
             return;
         }
     }
-    me.x = 50;
-    me.y = -100;
-    var container = lakePlatList.children[lakePlatList.children.length-1];
-    createjs.Tween.removeTweens(me);
-    createjs.Tween.get(me).
-        to({x: container.x + CELL * 2, y: container.y + 50 - CELL * 2}, 200, createjs.Ease.circIn).
-        call(enterPlat, [container]);
+    // fall in lake
+    lives -= 1;
+    console.log(lives);
+
+    restartLake();
 }
