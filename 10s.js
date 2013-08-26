@@ -52,6 +52,7 @@ var spriteData = {
 };
 
 var lives = 5;
+var respawning = false;
 
 var transitionTime = 600;
 
@@ -211,7 +212,9 @@ function exitPlat() {
     }
 }
 
-function restartLake() {
+function respawnLake() {
+    respawning = true;
+
     me.x = 320;
     me.y = -100;
     var container = lakePlatList.children[lakePlatList.children.length-1];
@@ -232,8 +235,11 @@ function detectCollisions() {
         if (collidePointWithRect(me.x, me.y, prop.x, prop.y, CELL * 5, CELL * 5)) {
             lives -= 1;
             console.log(lives);
+
+            respawning = true;
             createjs.Tween.get(me).
-                to({x: -100}, me.x * 4, createjs.Ease.circOut);
+                to({x: -100}, me.x * 4, createjs.Ease.circOut).
+                call(function () {respawning = false;});
             break;
         }
     }
@@ -256,7 +262,7 @@ function detectOutOfScreen() {
         console.log(lives);
 
         exitPlat();
-        restartLake();
+        respawnLake();
     }
 }
 
@@ -266,12 +272,13 @@ createjs.Ticker.addEventListener("tick", mainloop);
 function mainloop(event) {
     stage.update();
 
-    if (mode == "air") {
-        detectCollisions();
-    }
-
-    if (mode == "lake") {
-        detectOutOfScreen();
+    if (!respawning) {
+        if (mode == "air") {
+            detectCollisions();
+        }
+        if (mode == "lake") {
+            detectOutOfScreen();
+        }
     }
 
     if ((createjs.Ticker.getTime() - prevPlatTime) > lakePlatTimer) {
@@ -286,6 +293,10 @@ function mainloop(event) {
 }
 
 function enterPlat(container) {
+    if (!respawning) {
+        respawning = true;
+    }
+
     createjs.Tween.get(container).
         to({y: container.y + 20}, 100, createjs.Ease.quadInOut).
         to({y: container.y}, 300, createjs.Ease.quadInOut);
@@ -375,5 +386,5 @@ function onLakeComplete() {
     lives -= 1;
     console.log(lives);
 
-    restartLake();
+    respawnLake();
 }
