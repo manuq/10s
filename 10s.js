@@ -126,6 +126,9 @@ function createAirProp() {
     airProp.x = 640;
     airProp.y = Math.random() * (400 - CELL * 5);
 
+    airProp.regX = CELL * 2.5;
+    airProp.regY = CELL * 2.5;
+
     createjs.Tween.get(airProp).
         to({x: -CELL * 5}, 5000, createjs.Ease.linear).
         call(onAirPropComplete);
@@ -133,6 +136,9 @@ function createAirProp() {
     createjs.Tween.get(airProp, {loop: true}).
         to({y: airProp.y - 30}, 1000, createjs.Ease.quadInOut).
         to({y: airProp.y}, 500, createjs.Ease.quadInOut);
+
+    createjs.Tween.get(airProp, {loop: true}).
+        to({rotation: 360}, 3000, createjs.Ease.linear);
 
     airPropList.addChild(airProp);
 }
