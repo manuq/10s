@@ -20,11 +20,19 @@ var spriteData = {
         [0, 33 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [0, 36 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [0, 39 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
-        [0, 42 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0]
+        [0, 42 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
+        [3 * CELL, 0, 3 * CELL, 3 * CELL, 0, 0, 0],
+        [3 * CELL, 3 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
+        [3 * CELL, 6 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
+        [3 * CELL, 9 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
+        [3 * CELL, 12 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
+        [3 * CELL, 15 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0]
     ],
     animations: {
-        jump: [0, 14],
-        fly: {frames: [0, 0, 1, 1, 13, 13, 14, 14]}
+        stand: {frames: [0, 0, 1, 1, 13, 13, 14, 14]},
+        jump: [0, 14, "stand"],
+        fly: {frames: [15, 16, 17, 18, 19, 20, 18, 16],
+             next: "stand"}
     }
 };
 
@@ -84,7 +92,7 @@ function createLakePlat(dx) {
     var lakePlat = new createjs.Shape();
     lakePlat.graphics.beginFill("#ff0000").drawRect(0, 0, CELL * 6, CELL * 4);
     container.x = xIni;
-    container.y = 50 + Math.random() * (400 - CELL * 4 - 50);
+    container.y = 30 + Math.random() * (400 - CELL * 4 - 30);
 
     createjs.Tween.get(container).
         to({x: xFin}, 5000, createjs.Ease.linear).
@@ -98,7 +106,7 @@ function createAirProp() {
     var airProp = new createjs.Shape();
     airProp.graphics.beginFill("#00ff00").drawRect(0, 0, CELL * 5, CELL * 5);
     airProp.x = 640;
-    airProp.y = 50 + Math.random() * (400 - CELL * 5 - 50);
+    airProp.y = Math.random() * (400 - CELL * 5);
 
     createjs.Tween.get(airProp).
         to({x: -CELL * 5}, 5000, createjs.Ease.linear).
@@ -117,7 +125,7 @@ me.x = 100;
 me.y = 100;
 me.regX = CELL * 1.5;
 me.regY = CELL * 1.5;
-me.gotoAndPlay("fly");
+me.gotoAndPlay("stand");
 stage.addChild(me);
 
 stage.update();
@@ -142,6 +150,8 @@ function handleMouseDown(event) {
         createjs.Tween.get(me).
             to({x: stage.mouseX, y: stage.mouseY}, 400, createjs.Ease.quadInOut).
             call(onAirComplete);
+
+        me.gotoAndPlay("fly");
     }
     else {
         if (mode == "lake") {
@@ -268,7 +278,7 @@ function onTimerComplete() {
 }
 
 function onAirComplete() {
-    me.gotoAndPlay("fly");
+    me.gotoAndPlay("stand");
     moving = false;
 }
 
@@ -281,11 +291,10 @@ function onAirPropComplete() {
 }
 
 function onLakeComplete() {
-    me.gotoAndPlay("fly");
     moving = false;
     for (i=0; i<lakePlatList.children.length; i++) {
         var container = lakePlatList.children[i];
-        // FIXME USE lakePlat.hitTest(me.x, me.y)
+        // FIXME use lakePlat.hitTest(me.x, me.y)
         if (collidePointWithRect(me.x, me.y, container.x, container.y, CELL * 6, CELL * 4)) {
             var lakePlat = container.children[0];
             lakePlat.graphics.beginFill("#ffff00").drawRect(0, 0, CELL * 6, CELL * 4);
