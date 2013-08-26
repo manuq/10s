@@ -328,10 +328,15 @@ function onLakeComplete() {
         var container = lakePlatList.children[i];
         // FIXME use lakePlat.hitTest(me.x, me.y)
         if (collidePointWithRect(me.x, me.y, container.x, container.y, CELL * 6, CELL * 4)) {
-            var lakePlat = container.children[0];
-            console.log("IN");
             enterPlat(container);
             return;
         }
     }
+    me.x = 50;
+    me.y = -100;
+    var container = lakePlatList.children[lakePlatList.children.length-1];
+    createjs.Tween.removeTweens(me);
+    createjs.Tween.get(me).
+        to({x: container.x + CELL * 2, y: container.y + 50 - CELL * 2}, 200, createjs.Ease.circIn).
+        call(enterPlat, [container]);
 }
