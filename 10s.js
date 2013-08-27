@@ -4,7 +4,7 @@ stage.addEventListener("stagemousedown", handleMouseDown);
 var CELL = 19.75;
 
 var TEN = 10000;
-var DEBUG = false; //|| true;
+var DEBUG = false|| true;
 
 var SCREEN_W = 640;
 var SCREEN_H = 400;
@@ -73,7 +73,9 @@ var spriteData = {
 };
 
 var lives = 5;
+var moving = false;
 var respawning = false;
+var inTransition = false;
 
 var transitionTime = 600;
 
@@ -86,6 +88,47 @@ bg.graphics.beginFill("#89dbda").
     drawRect(0, SCREEN_H - HORIZON, SCREEN_W, SCREEN_H - HORIZON);
 
 stage.addChild(bg);
+
+var debugText;
+if (DEBUG) {
+    debugText = new createjs.Text("", "20px Arial", "#ff7700");
+    debugText.x = 355;
+    stage.addChild(debugText);
+}
+
+function updateDebug() {
+    debugText.text = "";
+    if (moving) {
+        debugText.text += "\nmoving";
+    }
+    if (respawning) {
+        debugText.text += "\nrespawning";
+    }
+    if (inTransition) {
+        debugText.text += "\nin transition";
+    }
+}
+
+function setMoving(bool) {
+    moving = bool;
+    if (DEBUG) {
+        updateDebug();
+    }
+}
+
+function setRespawning(bool) {
+    respawning = bool;
+    if (DEBUG) {
+        updateDebug();
+    }
+}
+
+function setTransition(bool) {
+    inTransition = bool;
+    if (DEBUG) {
+        updateDebug();
+    }
+}
 
 var timer = new createjs.Shape();
 timer.graphics.beginFill("#555").arc(25, 0, 25, 0, Math.PI, false);
@@ -196,8 +239,6 @@ var sceneNumber = 1;
 var mode; // air, lake
 updateMode();
 
-var inTransition = false;
-var moving = false;
 var platContainer;
 
 function handleMouseDown(event) {
@@ -207,13 +248,16 @@ function handleMouseDown(event) {
     if (moving) {
         return;
     }
+    if (respawning) {
+        return;
+    }
     if (mode == "air") {
         createjs.Tween.get(me).
             to({x: stage.mouseX, y: stage.mouseY}, SCREEN_H,
                createjs.Ease.quadInOut).
             call(onAirComplete);
 
-        moving = true;
+        setMoving(true);
         me.gotoAndPlay("fly");
     }
     else {
@@ -235,7 +279,7 @@ function handleMouseDown(event) {
                 to({y: stage.mouseY}, 200, createjs.Ease.circIn).
                 call(onLakeComplete);
 
-            moving = true;
+            setMoving(true);
             me.gotoAndPlay("jump");
         }
     }
@@ -252,7 +296,7 @@ function exitPlat() {
 }
 
 function respawnLake() {
-    respawning = true;
+    setRespawning(true);
 
     me.x = 320;
     me.y = -100;
@@ -272,7 +316,6 @@ function collidePointWithRect(x, y, rx, ry, rw, rh) {
 function collidePointWithCircle(x, y, cx, cy, cr) {
     var squareDist = Math.pow(x - cx, 2) + Math.pow(y - cy, 2);
     return Math.pow(cr, 2) > squareDist;
-    console.log("CIRC!")
 }
 
 function detectCollisions() {
@@ -283,10 +326,13 @@ function detectCollisions() {
             lives -= 1;
             console.log(lives);
 
-            respawning = true;
+            createjs.Tween.removeTweens(me);
+            setMoving(false);
+
+            setRespawning(true);
             createjs.Tween.get(me).
                 to({x: -100}, me.x * 4, createjs.Ease.circOut).
-                call(function () {respawning = false;});
+                call(function () {setRespawning(false);});
             break;
         }
     }
@@ -340,8 +386,8 @@ function mainloop(event) {
 }
 
 function enterPlat(container) {
-    if (!respawning) {
-        respawning = true;
+    if (respawning) {
+        setRespawning(false);
     }
 
     createjs.Tween.get(container).
@@ -349,6 +395,7 @@ function enterPlat(container) {
         to({y: container.y}, 300, createjs.Ease.quadInOut);
 
     createjs.Tween.removeTweens(me);
+    setMoving(false);
     var p = container.globalToLocal(me.x, me.y);
     me.x = p.x;
     me.y = p.y;
@@ -358,12 +405,12 @@ function enterPlat(container) {
 }
 
 function endTransition() {
-    inTransition = false;
+    setTransition(false);
 }
 
 function updateMode() {
-    moving = false;
-    inTransition = true;
+    setMoving(false);
+    setTransition(true);
 
     me.gotoAndPlay("fly");
 
@@ -410,7 +457,7 @@ function onTimerComplete() {
 
 function onAirComplete() {
     me.gotoAndPlay("stand");
-    moving = false;
+    setMoving(false);
 }
 
 function onLakePlatComplete() {
@@ -422,7 +469,7 @@ function onAirPropComplete() {
 }
 
 function onLakeComplete() {
-    moving = false;
+    setMoving(false);
     for (i=0; i<lakePlatList.children.length; i++) {
         var container = lakePlatList.children[i];
         // FIXME use lakePlat.hitTest(me.x, me.y)
