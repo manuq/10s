@@ -1,5 +1,5 @@
 var stage = new createjs.Stage("canvas");
-stage.addEventListener("stagemousedown", handleMouseDownMenu);
+createjs.Ticker.setFPS(24);
 
 var CELL = 19.75;
 
@@ -84,12 +84,14 @@ var spriteData = {
 
 var spriteSheet = new createjs.SpriteSheet(spriteData);
 
-var lives = 10;
-var moving = false;
-var respawning = false;
-var inTransition = false;
+var lives;
+var moving;
+var respawning;
+var inTransition;
 var transitionTime = 600;
 var platContainer;
+var prevPlatTime = 0;
+var lakePlatTimer = 1000;
 
 var bg = new createjs.Shape();
 
@@ -101,25 +103,92 @@ bg.graphics.beginFill("#89dbda").
 
 stage.addChild(bg);
 
-var menu = new createjs.Container();
-stage.addChild(menu);
-//stage.removeChild(menu);
+var menu;
+var timer;
+var livesText;
+var allThings;
+var lakePlatList;
+var airPropList;
 
-var menuProp = new createjs.BitmapAnimation(spriteSheet);
-menuProp.gotoAndStop(32);
+function init() {
+    createjs.Ticker.addEventListener("tick", menuLoop);
+    stage.addEventListener("stagemousedown", handleMouseDownMenu);
 
-// menuProp.graphics.beginFill("#ffff00").
-//     drawRect(0, 0,CELL * 15, CELL * 5);
-menu.addChild(menuProp);
+    lives = 2;//5;
+    moving = false;
+    respawning = false;
+    inTransition = false;
+    platContainer = undefined;
 
-var menuProp2 = new createjs.BitmapAnimation(spriteSheet);
-menuProp2.gotoAndStop(33);
-menuProp2.x = (SCREEN_W - CELL * 16)/2;
-menuProp2.y = SCREEN_H - CELL * 11;
-createjs.Tween.get(menuProp2, {loop: true}).
-    to({y: menuProp2.y - 30}, 2000, createjs.Ease.quadInOut).
-    to({y: menuProp2.y}, 2000, createjs.Ease.quadInOut);
-menu.addChild(menuProp2);
+    menu = new createjs.Container();
+    stage.addChild(menu);
+
+    var menuProp = new createjs.BitmapAnimation(spriteSheet);
+    menuProp.gotoAndStop(32);
+    menu.addChild(menuProp);
+
+    var menuProp2 = new createjs.BitmapAnimation(spriteSheet);
+    menuProp2.gotoAndStop(33);
+    menuProp2.x = (SCREEN_W - CELL * 16)/2;
+    menuProp2.y = SCREEN_H - CELL * 11;
+    createjs.Tween.get(menuProp2, {loop: true}).
+        to({y: menuProp2.y - 30}, 2000, createjs.Ease.quadInOut).
+        to({y: menuProp2.y}, 2000, createjs.Ease.quadInOut);
+    menu.addChild(menuProp2);
+
+    timer = new createjs.Shape();
+    timer.graphics.beginFill("#555").drawCircle(25, 0, 25);
+    timer.alpha = 0.8;
+    timer.x = 295;
+    timer.y = 10;
+    timer.scaleX = 0;
+    timer.scaleY = 0;
+    timer.regX = 25;
+    stage.addChild(timer);
+
+    livesText = new createjs.Text("", "20px Arial", "#555");
+    livesText.visible = false;
+    livesText.alpha = 0;
+    livesText.x = 335;
+    stage.addChild(livesText);
+    updateLivesText();
+
+    allThings = new createjs.Container();
+    stage.addChild(allThings);
+
+    lakePlatList = new createjs.Container();
+    lakePlatList.y = SCREEN_H;
+    allThings.addChild(lakePlatList);
+
+    airPropList = new createjs.Container();
+    allThings.addChild(airPropList);
+
+
+};
+
+init();
+
+function restart() {
+    stage.removeChild(timer);
+    createjs.Tween.removeTweens(timer);
+    stage.removeChild(livesText);
+    stage.removeChild(allThings);
+
+    createjs.Tween.removeTweens(me);
+    createjs.Tween.get(me).
+        to({x: 284, y: 82, regX: 50, regY: 42, rotation: 120},
+           500, createjs.Ease.quadInOut).
+        call(function () {
+            createjs.Tween.get(me, {loop: true}).
+                to({rotation: 160}, 150, createjs.Ease.quadInOut).
+                to({rotation: 120}, 150, createjs.Ease.quadInOut);
+            me.gotoAndStop(0);
+        });
+
+    createjs.Ticker.removeEventListener("tick", mainLoop);
+
+    init();
+};
 
 var debugText;
 if (DEBUG) {
@@ -172,26 +241,6 @@ function setPlatContainer(val) {
     }
 }
 
-var timer = new createjs.Shape();
-timer.graphics.beginFill("#555").drawCircle(25, 0, 25);
-timer.alpha = 0.8;
-timer.x = 295;
-timer.y = 10;
-timer.scaleX = 0;
-timer.scaleY = 0;
-timer.regX = 25;
-stage.addChild(timer);
-
-var livesText = new createjs.Text("", "20px Arial", "#555");
-livesText.visible = false;
-livesText.alpha = 0;
-livesText.x = 335;
-stage.addChild(livesText);
-function updateLivesText() {
-    livesText.text = "<3   " + lives;
-}
-updateLivesText();
-
 function animateTimer() {
     createjs.Tween.get(timer).
         to({scaleX: 1.3, scaleY: 1.3}, 300, createjs.Ease.quadInOut).
@@ -199,17 +248,9 @@ function animateTimer() {
         call(onTimerComplete);
 }
 
-var allThings = new createjs.Container();
-stage.addChild(allThings);
-
-var prevPlatTime = 0;
-var lakePlatTimer = 1000;
-var lakePlatList = new createjs.Container();
-lakePlatList.y = SCREEN_H;
-allThings.addChild(lakePlatList);
-
-var airPropList = new createjs.Container();
-allThings.addChild(airPropList);
+function updateLivesText() {
+    livesText.text = "<3   " + lives;
+}
 
 function createLakePlat(dx) {
     var xIni;
@@ -303,9 +344,6 @@ stage.update();
 
 var sceneNumber = 1;
 var mode; // air, lake
-
-createjs.Ticker.setFPS(24);
-createjs.Ticker.addEventListener("tick", menuLoop);
 
 function handleMouseDownMenu(event) {
     stage.removeEventListener("stagemousedown", handleMouseDownMenu);
@@ -423,6 +461,10 @@ function detectCollisions() {
                                  AIR_COLLIDE_RADIUS)) {
             lives -= 1;
             updateLivesText();
+            if (lives <= 0) {
+                restart();
+                return;
+            }
 
             createjs.Tween.removeTweens(me);
             setMoving(false);
@@ -453,6 +495,10 @@ function detectOutOfScreen() {
     if (lost) {
         lives -= 1;
         updateLivesText();
+        if (lives <= 0) {
+            restart();
+            return;
+        }
 
         exitPlat();
         respawnLake();
@@ -595,6 +641,10 @@ function onLakeComplete() {
 
     lives -= 1;
     updateLivesText();
+    if (lives <= 0) {
+        restart();
+        return;
+    }
 
     respawnLake();
 }
