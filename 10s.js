@@ -4,6 +4,7 @@ stage.addEventListener("stagemousedown", handleMouseDown);
 var CELL = 19.75;
 
 var TEN = 10000;
+var DEBUG = false; //|| true;
 
 var SCREEN_W = 640;
 var SCREEN_H = 400;
@@ -11,6 +12,7 @@ var HORIZON = 50;
 
 var AIR_PROP_W = CELL * 5;
 var AIR_PROP_H = CELL * 5;
+var AIR_COLLIDE_RADIUS = 55;
 
 var LAKE_PLAT_W = CELL * 6;
 var LAKE_PLAT_H = CELL * 4;
@@ -136,26 +138,40 @@ function createLakePlat(dx) {
 }
 
 function createAirProp() {
+    var container = new createjs.Container();
+    container.x = SCREEN_W;
+    container.y = Math.random() * (SCREEN_H - AIR_PROP_H);
+    airPropList.addChild(container);
+
     var airProp = new createjs.BitmapAnimation(spriteSheet);
     airProp.gotoAndStop(21 + Math.floor(Math.random() * 4));
-    airProp.x = SCREEN_W;
-    airProp.y = Math.random() * (SCREEN_H - AIR_PROP_H);
 
     airProp.regX = AIR_PROP_W / 2;
     airProp.regY = AIR_PROP_H / 2;
 
-    createjs.Tween.get(airProp).
+    createjs.Tween.get(container).
         to({x: -AIR_PROP_W}, 5000, createjs.Ease.linear).
         call(onAirPropComplete);
 
-    createjs.Tween.get(airProp, {loop: true}).
-        to({y: airProp.y - 30}, 1000, createjs.Ease.quadInOut).
-        to({y: airProp.y}, 500, createjs.Ease.quadInOut);
+    createjs.Tween.get(container, {loop: true}).
+        to({y: container.y - 30}, 1000, createjs.Ease.quadInOut).
+        to({y: container.y}, 500, createjs.Ease.quadInOut);
 
     createjs.Tween.get(airProp, {loop: true}).
         to({rotation: 360}, 3000, createjs.Ease.linear);
 
-    airPropList.addChild(airProp);
+    container.addChild(airProp);
+
+    if (DEBUG) {
+        var r = AIR_COLLIDE_RADIUS;
+        var p = new createjs.Shape();
+        p.graphics.beginFill("#f00").drawCircle(r, r, r);
+        p.alpha = 0.3;
+        p.regX = r;
+        p.regY = r;
+        container.addChild(p);
+    }
+
 }
 
 var spriteSheet = new createjs.SpriteSheet(spriteData);
@@ -246,11 +262,17 @@ function collidePointWithRect(x, y, rx, ry, rw, rh) {
     return (rx < x) && (x < rx + rw) && (ry < y) && (y < ry + rh);
 }
 
+function collidePointWithCircle(x, y, cx, cy, cr) {
+    var squareDist = Math.pow(x - cx, 2) + Math.pow(y - cy, 2);
+    return Math.pow(cr, 2) > squareDist;
+    console.log("CIRC!")
+}
+
 function detectCollisions() {
     for (i=0; i<airPropList.children.length; i++) {
         var prop = airPropList.children[i];
-        if (collidePointWithRect(me.x, me.y, prop.x, prop.y,
-                                 AIR_PROP_W, AIR_PROP_H)) {
+        if (collidePointWithCircle(me.x, me.y, prop.x, prop.y,
+                                 AIR_COLLIDE_RADIUS)) {
             lives -= 1;
             console.log(lives);
 
