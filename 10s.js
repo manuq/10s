@@ -85,6 +85,8 @@ var spriteData = {
 var spriteSheet = new createjs.SpriteSheet(spriteData);
 
 var lives;
+var sceneNumber;
+var mode; // air, lake
 var moving;
 var respawning;
 var inTransition;
@@ -114,7 +116,8 @@ function init() {
     createjs.Ticker.addEventListener("tick", menuLoop);
     stage.addEventListener("stagemousedown", handleMouseDownMenu);
 
-    lives = 2;//5;
+    lives = 5;
+    sceneNumber = 1;
     moving = false;
     respawning = false;
     inTransition = false;
@@ -184,6 +187,11 @@ function restart() {
                 to({rotation: 120}, 150, createjs.Ease.quadInOut);
             me.gotoAndStop(0);
         });
+
+    createjs.Tween.removeTweens(bg);
+    createjs.Tween.get(bg).
+        to({y: 0}, transitionTime, createjs.Ease.quadInOut).
+        call(endTransition);
 
     createjs.Ticker.removeEventListener("tick", mainLoop);
 
@@ -341,9 +349,6 @@ me.gotoAndStop(0);
 stage.addChild(me);
 
 stage.update();
-
-var sceneNumber = 1;
-var mode; // air, lake
 
 function handleMouseDownMenu(event) {
     stage.removeEventListener("stagemousedown", handleMouseDownMenu);
