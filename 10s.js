@@ -1,5 +1,5 @@
 var stage = new createjs.Stage("canvas");
-stage.addEventListener("stagemousedown", handleMouseDown);
+stage.addEventListener("stagemousedown", handleMouseDownMenu);
 
 var CELL = 19.75;
 
@@ -92,19 +92,19 @@ bg.graphics.beginFill("#89dbda").
 
 stage.addChild(bg);
 
-// var menu = new createjs.Container();
-// stage.addChild(menu);
-// //stage.removeChild(menu);
+var menu = new createjs.Container();
+stage.addChild(menu);
+//stage.removeChild(menu);
 
-// var menuProp = new createjs.Shape();
-// menuProp.graphics.beginFill("#ffff00").
-//     drawRect(0, 0,CELL * 15, CELL * 5);
-// menu.addChild(menuProp);
+var menuProp = new createjs.Shape();
+menuProp.graphics.beginFill("#ffff00").
+    drawRect(0, 0,CELL * 15, CELL * 5);
+menu.addChild(menuProp);
 
-// var menuProp2 = new createjs.Shape();
-// menuProp2.graphics.beginFill("#ffff00").
-//     drawRect((SCREEN_W - CELL * 16)/2, SCREEN_H - CELL * 11, CELL * 15, CELL * 10);
-// menu.addChild(menuProp2);
+var menuProp2 = new createjs.Shape();
+menuProp2.graphics.beginFill("#ffff00").
+    drawRect((SCREEN_W - CELL * 16)/2, SCREEN_H - CELL * 11, CELL * 15, CELL * 10);
+menu.addChild(menuProp2);
 
 var debugText;
 if (DEBUG) {
@@ -168,7 +168,8 @@ timer.regX = 25;
 stage.addChild(timer);
 
 var livesText = new createjs.Text("", "20px Arial", "#555");
-livesText.alpha = 0.8;
+livesText.visible = false;
+livesText.alpha = 0;
 livesText.x = 335;
 stage.addChild(livesText);
 function updateLivesText() {
@@ -182,7 +183,6 @@ function animateTimer() {
         to({scaleX: 0, scaleY: 0}, TEN - 300, createjs.Ease.linear).
         call(onTimerComplete);
 }
-animateTimer();
 
 var allThings = new createjs.Container();
 stage.addChild(allThings);
@@ -283,7 +283,30 @@ stage.update();
 
 var sceneNumber = 1;
 var mode; // air, lake
-updateMode();
+
+createjs.Ticker.setFPS(24);
+createjs.Ticker.addEventListener("tick", menuLoop);
+
+function handleMouseDownMenu(event) {
+    stage.removeEventListener("stagemousedown", handleMouseDownMenu);
+    createjs.Tween.get(menu).
+        to({x: -SCREEN_W}, 2000, createjs.Ease.quadInOut).
+        call(function () {
+            stage.removeChild(this);
+            stage.addEventListener("stagemousedown", handleMouseDown);
+            start();
+        });
+}
+
+function start() {
+    createjs.Ticker.removeEventListener("tick", menuLoop);
+    createjs.Ticker.addEventListener("tick", mainLoop);
+    animateTimer();
+    updateMode();
+    createjs.Tween.get(livesText).
+        set({visible: true}).
+        to({alpha: 0.8}, 1000, createjs.Ease.quadInOut);
+};
 
 function handleMouseDown(event) {
     if (inTransition) {
@@ -408,10 +431,12 @@ function detectOutOfScreen() {
     }
 }
 
-createjs.Ticker.setFPS(24);
-createjs.Ticker.addEventListener("tick", mainloop);
 
-function mainloop(event) {
+function menuLoop(event) {
+    stage.update();
+}
+
+function mainLoop(event) {
     stage.update();
 
     if (!respawning || !inTransition) {
