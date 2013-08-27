@@ -202,6 +202,14 @@ function createLakePlat(dx) {
         call(onLakePlatComplete);
 
     container.addChild(lakePlat);
+
+    if (DEBUG) {
+        var p = new createjs.Shape();
+        p.graphics.beginFill("#0f0").rect(0, 0, LAKE_PLAT_W, LAKE_PLAT_H);
+        p.alpha = 0.3;
+        container.addChild(p);
+    }
+
     return container;
 }
 
