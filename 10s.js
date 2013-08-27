@@ -60,7 +60,14 @@ var spriteData = {
         // 29 - 31: fall
         [7 * CELL, 32 * CELL, 6 * CELL, 3 * CELL, 0, 0, 0],
         [7 * CELL, 28 * CELL, 6 * CELL, 3 * CELL, 0, 0, 0],
-        [7 * CELL, 24 * CELL, 6 * CELL, 3 * CELL, 0, 0, 0]
+        [7 * CELL, 24 * CELL, 6 * CELL, 3 * CELL, 0, 0, 0],
+
+        // 32: menu 1
+        [14 * CELL, 20 * CELL, 15 * CELL, 5 * CELL, 0, 0, 0],
+
+        // 33: menu 2
+        [14 * CELL, 26 * CELL, 15 * CELL, 10 * CELL, 0, 0, 0]
+
 
     ],
     animations: {
@@ -74,6 +81,8 @@ var spriteData = {
         splash: [29, 31, false, 2]
     }
 };
+
+var spriteSheet = new createjs.SpriteSheet(spriteData);
 
 var lives = 10;
 var moving = false;
@@ -96,14 +105,20 @@ var menu = new createjs.Container();
 stage.addChild(menu);
 //stage.removeChild(menu);
 
-var menuProp = new createjs.Shape();
-menuProp.graphics.beginFill("#ffff00").
-    drawRect(0, 0,CELL * 15, CELL * 5);
+var menuProp = new createjs.BitmapAnimation(spriteSheet);
+menuProp.gotoAndStop(32);
+
+// menuProp.graphics.beginFill("#ffff00").
+//     drawRect(0, 0,CELL * 15, CELL * 5);
 menu.addChild(menuProp);
 
-var menuProp2 = new createjs.Shape();
-menuProp2.graphics.beginFill("#ffff00").
-    drawRect((SCREEN_W - CELL * 16)/2, SCREEN_H - CELL * 11, CELL * 15, CELL * 10);
+var menuProp2 = new createjs.BitmapAnimation(spriteSheet);
+menuProp2.gotoAndStop(33);
+menuProp2.x = (SCREEN_W - CELL * 16)/2;
+menuProp2.y = SCREEN_H - CELL * 11;
+createjs.Tween.get(menuProp2, {loop: true}).
+    to({y: menuProp2.y - 30}, 2000, createjs.Ease.quadInOut).
+    to({y: menuProp2.y}, 2000, createjs.Ease.quadInOut);
 menu.addChild(menuProp2);
 
 var debugText;
@@ -270,7 +285,6 @@ function createAirProp() {
 
 }
 
-var spriteSheet = new createjs.SpriteSheet(spriteData);
 var me = new createjs.BitmapAnimation(spriteSheet);
 me.x = 100;
 me.y = 100;
