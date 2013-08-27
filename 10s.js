@@ -76,8 +76,8 @@ var lives = 10;
 var moving = false;
 var respawning = false;
 var inTransition = false;
-
 var transitionTime = 600;
+var platContainer;
 
 var bg = new createjs.Shape();
 
@@ -107,24 +107,34 @@ function updateDebug() {
     if (inTransition) {
         debugText.text += "\nin transition";
     }
+    if (platContainer !== undefined) {
+        debugText.text += "\nin plat";
+    }
 }
 
-function setMoving(bool) {
-    moving = bool;
+function setMoving(val) {
+    moving = val;
     if (DEBUG) {
         updateDebug();
     }
 }
 
-function setRespawning(bool) {
-    respawning = bool;
+function setRespawning(val) {
+    respawning = val;
     if (DEBUG) {
         updateDebug();
     }
 }
 
-function setTransition(bool) {
-    inTransition = bool;
+function setTransition(val) {
+    inTransition = val;
+    if (DEBUG) {
+        updateDebug();
+    }
+}
+
+function setPlatContainer(val) {
+    platContainer = val;
     if (DEBUG) {
         updateDebug();
     }
@@ -248,8 +258,6 @@ var sceneNumber = 1;
 var mode; // air, lake
 updateMode();
 
-var platContainer;
-
 function handleMouseDown(event) {
     if (inTransition) {
         return;
@@ -303,7 +311,7 @@ function exitPlat() {
         me.x = p.x;
         me.y = p.y;
         stage.addChild(me);
-        platContainer = undefined;
+        setPlatContainer(undefined);
     }
 }
 
@@ -415,7 +423,7 @@ function enterPlat(container) {
     me.y = p.y;
 
     container.addChild(me);
-    platContainer = container;
+    setPlatContainer(container);
 }
 
 function endTransition() {
@@ -423,14 +431,14 @@ function endTransition() {
 }
 
 function updateMode() {
-    setMoving(false);
     setTransition(true);
+    setMoving(false);
+    createjs.Tween.removeTweens(me);
 
     me.gotoAndPlay("fly");
 
     if (sceneNumber % 2 == 0) {
         mode = "lake";
-        exitPlat();
 
         createjs.Tween.get(bg).
             to({y: -300}, transitionTime, createjs.Ease.quadInOut).
