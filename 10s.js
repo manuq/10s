@@ -72,7 +72,7 @@ var spriteData = {
     }
 };
 
-var lives = 5;
+var lives = 10;
 var moving = false;
 var respawning = false;
 var inTransition = false;
@@ -143,7 +143,7 @@ var livesText = new createjs.Text("", "20px Arial", "#555");
 livesText.x = 325;
 stage.addChild(livesText);
 function updateLivesText() {
-    livesText.text = "Lives: " + lives;
+    livesText.text = "<3   " + lives;
 }
 updateLivesText();
 
@@ -198,7 +198,8 @@ function createLakePlat(dx) {
 function createAirProp() {
     var container = new createjs.Container();
     container.x = SCREEN_W;
-    container.y = Math.random() * (SCREEN_H - AIR_PROP_H);
+    container.y = 30 + CELL * 2 + AIR_PROP_H / 2 +
+        Math.random() * (SCREEN_H - AIR_PROP_H);
     airPropList.addChild(container);
 
     var airProp = new createjs.BitmapAnimation(spriteSheet);
@@ -260,6 +261,9 @@ function handleMouseDown(event) {
         return;
     }
     if (mode == "air") {
+        if (stage.mouseY < CELL * 2) {
+            return;
+        }
         createjs.Tween.get(me).
             to({x: stage.mouseX, y: stage.mouseY}, SCREEN_H,
                createjs.Ease.quadInOut).
@@ -340,6 +344,8 @@ function detectCollisions() {
             setRespawning(true);
             createjs.Tween.get(me).
                 to({x: -100}, me.x * 4, createjs.Ease.circOut).
+                set({y: CELL * 1.5}).
+                to({x: CELL * 1.5}, 200, createjs.Ease.quadInOut).
                 call(function () {setRespawning(false);});
             break;
         }
@@ -373,7 +379,7 @@ createjs.Ticker.addEventListener("tick", mainloop);
 function mainloop(event) {
     stage.update();
 
-    if (!respawning) {
+    if (!respawning || !inTransition) {
         if (mode == "air") {
             detectCollisions();
         }
