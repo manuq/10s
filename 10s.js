@@ -286,11 +286,17 @@ function createAirProp() {
 }
 
 var me = new createjs.BitmapAnimation(spriteSheet);
-me.x = 100;
-me.y = 100;
-me.regX = CELL * 1.5;
-me.regY = CELL * 1.5;
-me.gotoAndPlay("stand");
+me.x = 284;
+me.y = 82;
+me.regX = 50;
+me.regY = 42;
+me.rotation = 120;
+
+createjs.Tween.get(me, {loop: true}).
+    to({rotation: 160}, 150, createjs.Ease.quadInOut).
+    to({rotation: 120}, 150, createjs.Ease.quadInOut);
+me.gotoAndStop(0);
+
 stage.addChild(me);
 
 stage.update();
@@ -303,6 +309,14 @@ createjs.Ticker.addEventListener("tick", menuLoop);
 
 function handleMouseDownMenu(event) {
     stage.removeEventListener("stagemousedown", handleMouseDownMenu);
+
+    me.gotoAndPlay("stand");
+
+    createjs.Tween.removeTweens(me);
+    createjs.Tween.get(me).
+        to({x: 100, y: SCREEN_H / 2, regX: CELL * 1.5, regY: CELL * 1.5, rotation: 0},
+           2000, createjs.Ease.quadInOut);
+
     createjs.Tween.get(menu).
         to({x: -SCREEN_W}, 2000, createjs.Ease.quadInOut).
         call(function () {
