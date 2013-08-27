@@ -20,7 +20,7 @@ var LAKE_PLAT_H = CELL * 4;
 var spriteData = {
     images: ["sprite.png"],
     frames: [
-        // leaf anim jump
+        // 0 - 14: leaf anim jump
         [0, 0, 3 * CELL, 3 * CELL, 0, 0, 0],
         [0, 3 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [0, 6 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
@@ -37,7 +37,7 @@ var spriteData = {
         [0, 39 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [0, 42 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
 
-        // leaf anim fly
+        // 15 - 20: leaf anim fly
         [3 * CELL, 0, 3 * CELL, 3 * CELL, 0, 0, 0],
         [3 * CELL, 3 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [3 * CELL, 6 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
@@ -45,23 +45,30 @@ var spriteData = {
         [3 * CELL, 12 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
         [3 * CELL, 15 * CELL, 3 * CELL, 3 * CELL, 0, 0, 0],
 
-        // air props
+        // 21 - 24: air props
         [7 * CELL, 0, 5 * CELL, 5 * CELL, 0, 0, 0],
         [7 * CELL, 6 * CELL, 5 * CELL, 5 * CELL, 0, 0, 0],
         [7 * CELL, 12 * CELL, 5 * CELL, 5 * CELL, 0, 0, 0],
         [7 * CELL, 18 * CELL, 5 * CELL, 5 * CELL, 0, 0, 0],
 
-        // lake plats
+        // 25 - 28: lake plats
         [13 * CELL, 0, 6 * CELL, 4 * CELL, 0, 0, 0],
         [13 * CELL, 5 * CELL, 6 * CELL, 4 * CELL, 0, 0, 0],
         [13 * CELL, 10 * CELL, 6 * CELL, 4 * CELL, 0, 0, 0],
-        [13 * CELL, 15 * CELL, 6 * CELL, 4 * CELL, 0, 0, 0]
+        [13 * CELL, 15 * CELL, 6 * CELL, 4 * CELL, 0, 0, 0],
+
+        // 29 - 31: fall
+        [7 * CELL, 32 * CELL, 6 * CELL, 3 * CELL, 0, 0, 0],
+        [7 * CELL, 28 * CELL, 6 * CELL, 3 * CELL, 0, 0, 0],
+        [7 * CELL, 24 * CELL, 6 * CELL, 3 * CELL, 0, 0, 0]
+
     ],
     animations: {
         stand: {frames: [0, 0, 1, 1, 13, 13, 14, 14]},
         jump: [0, 14, "stand"],
         fly: {frames: [15, 16, 17, 18, 19, 20, 18, 16],
-             next: "stand"}
+             next: "stand"},
+        splash: [29, 31, false, 2]
     }
 };
 
@@ -426,6 +433,17 @@ function onLakeComplete() {
         }
     }
     // fall in lake
+
+    var splash = new createjs.BitmapAnimation(spriteSheet);
+    splash.x = me.x - CELL * 3;
+    splash.y = me.y - CELL * 1.5;
+    stage.addChild(splash);
+    splash.gotoAndPlay("splash");
+
+    createjs.Tween.get(splash).
+        wait(250).
+        call(function () {stage.removeChild(this)});
+
     lives -= 1;
     console.log(lives);
 
