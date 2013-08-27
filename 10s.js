@@ -159,6 +159,7 @@ function setPlatContainer(val) {
 
 var timer = new createjs.Shape();
 timer.graphics.beginFill("#555").drawCircle(25, 0, 25);
+timer.alpha = 0.8;
 timer.x = 295;
 timer.y = 10;
 timer.scaleX = 0;
@@ -167,7 +168,8 @@ timer.regX = 25;
 stage.addChild(timer);
 
 var livesText = new createjs.Text("", "20px Arial", "#555");
-livesText.x = 325;
+livesText.alpha = 0.8;
+livesText.x = 335;
 stage.addChild(livesText);
 function updateLivesText() {
     livesText.text = "<3   " + lives;
@@ -176,7 +178,7 @@ updateLivesText();
 
 function animateTimer() {
     createjs.Tween.get(timer).
-        to({scaleX: 1, scaleY: 1}, 300, createjs.Ease.quadInOut).
+        to({scaleX: 1.3, scaleY: 1.3}, 300, createjs.Ease.quadInOut).
         to({scaleX: 0, scaleY: 0}, TEN - 300, createjs.Ease.linear).
         call(onTimerComplete);
 }
