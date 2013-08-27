@@ -4,7 +4,7 @@ stage.addEventListener("stagemousedown", handleMouseDown);
 var CELL = 19.75;
 
 var TEN = 10000;
-var DEBUG = false|| true;
+var DEBUG = false;//|| true;
 
 var SCREEN_W = 640;
 var SCREEN_H = 400;
@@ -64,7 +64,10 @@ var spriteData = {
 
     ],
     animations: {
-        stand: {frames: [0, 0, 1, 1, 13, 13, 14, 14]},
+        stand: {
+            frames: [0, 1, 13, 14, 13],
+            frequency: 2
+        },
         jump: [0, 14, "stand"],
         fly: {frames: [15, 16, 17, 18, 19, 20, 18, 16],
              next: "stand"},
@@ -88,6 +91,20 @@ bg.graphics.beginFill("#89dbda").
     drawRect(0, SCREEN_H - HORIZON, SCREEN_W, SCREEN_H - HORIZON);
 
 stage.addChild(bg);
+
+// var menu = new createjs.Container();
+// stage.addChild(menu);
+// //stage.removeChild(menu);
+
+// var menuProp = new createjs.Shape();
+// menuProp.graphics.beginFill("#ffff00").
+//     drawRect(0, 0,CELL * 15, CELL * 5);
+// menu.addChild(menuProp);
+
+// var menuProp2 = new createjs.Shape();
+// menuProp2.graphics.beginFill("#ffff00").
+//     drawRect((SCREEN_W - CELL * 16)/2, SCREEN_H - CELL * 11, CELL * 15, CELL * 10);
+// menu.addChild(menuProp2);
 
 var debugText;
 if (DEBUG) {
