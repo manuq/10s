@@ -501,6 +501,7 @@ function detectOutOfScreen() {
         lives -= 1;
         updateLivesText();
         if (lives <= 0) {
+            exitPlat();
             restart();
             return;
         }
