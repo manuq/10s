@@ -92,7 +92,7 @@ stage.addChild(bg);
 var debugText;
 if (DEBUG) {
     debugText = new createjs.Text("", "20px Arial", "#ff7700");
-    debugText.x = 355;
+    debugText.x = 325;
     stage.addChild(debugText);
 }
 
@@ -131,13 +131,21 @@ function setTransition(bool) {
 }
 
 var timer = new createjs.Shape();
-timer.graphics.beginFill("#555").arc(25, 0, 25, 0, Math.PI, false);
+timer.graphics.beginFill("#555").drawCircle(25, 0, 25);
 timer.x = 295;
-timer.y = 0;
+timer.y = 10;
 timer.scaleX = 0;
 timer.scaleY = 0;
 timer.regX = 25;
 stage.addChild(timer);
+
+var livesText = new createjs.Text("", "20px Arial", "#555");
+livesText.x = 325;
+stage.addChild(livesText);
+function updateLivesText() {
+    livesText.text = "Lives: " + lives;
+}
+updateLivesText();
 
 function animateTimer() {
     createjs.Tween.get(timer).
@@ -324,7 +332,7 @@ function detectCollisions() {
         if (collidePointWithCircle(me.x, me.y, prop.x, prop.y,
                                  AIR_COLLIDE_RADIUS)) {
             lives -= 1;
-            console.log(lives);
+            updateLivesText();
 
             createjs.Tween.removeTweens(me);
             setMoving(false);
@@ -352,7 +360,7 @@ function detectOutOfScreen() {
     }
     if (lost) {
         lives -= 1;
-        console.log(lives);
+        updateLivesText();
 
         exitPlat();
         respawnLake();
@@ -492,7 +500,7 @@ function onLakeComplete() {
         call(function () {stage.removeChild(this)});
 
     lives -= 1;
-    console.log(lives);
+    updateLivesText();
 
     respawnLake();
 }
