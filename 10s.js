@@ -598,8 +598,6 @@ function updateMode() {
 
         createjs.Tween.get(allThings).
             to({y: 0}, transitionTime, createjs.Ease.quadInOut);
-
-        createAirProp();
     }
 }
 
