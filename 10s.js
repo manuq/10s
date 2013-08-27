@@ -298,7 +298,7 @@ function createLakePlat(dx) {
 
 function createAirProp() {
     var container = new createjs.Container();
-    container.x = SCREEN_W;
+    container.x = SCREEN_W + AIR_PROP_W / 2;
     container.y = 30 + CELL * 2 + AIR_PROP_H / 2 +
         Math.random() * (SCREEN_H - AIR_PROP_H);
     airPropList.addChild(container);
