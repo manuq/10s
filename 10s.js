@@ -1,4 +1,5 @@
 var stage = new createjs.Stage("canvas");
+createjs.Touch.enable(stage, true, false);
 createjs.Ticker.setFPS(24);
 
 var CELL = 19.75;
