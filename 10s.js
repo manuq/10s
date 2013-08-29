@@ -392,7 +392,7 @@ function handleMouseDown(event) {
     }
     if (mode == "air") {
         if (stage.mouseY < CELL * 2) {
-            return;
+            stage.mouseY = CELL * 2;
         }
         createjs.Tween.get(me).
             to({x: stage.mouseX, y: stage.mouseY}, SCREEN_H,
@@ -406,7 +406,7 @@ function handleMouseDown(event) {
         if (mode == "lake") {
             // horizon
             if (stage.mouseY < HORIZON) {
-                return;
+                stage.mouseY = HORIZON;
             }
 
             exitPlat();
